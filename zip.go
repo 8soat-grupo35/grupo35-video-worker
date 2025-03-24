@@ -2,49 +2,55 @@ package main
 
 import (
 	"archive/zip"
+	"fmt"
 	"io"
 	"os"
 )
 
 type ZipGenerator struct {
-	file      *os.File
-	zipWriter *zip.Writer
+	destinationPath string
+	file            *os.File
 }
 
 func NewZipGenerator(destinationPath string) ZipGenerator {
 	file, err := os.Create(destinationPath)
 
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 
-	w := zip.NewWriter(file)
+	defer file.Close()
 
 	return ZipGenerator{
-		file:      file,
-		zipWriter: w,
+		destinationPath: destinationPath,
+		file:            file,
 	}
 }
 
 func (Z ZipGenerator) AddFiles(files []string) {
+	zipFile, _ := os.OpenFile(Z.destinationPath, os.O_CREATE|os.O_WRONLY, 0644)
+	defer zipFile.Close()
+
+	w := zip.NewWriter(zipFile)
+	defer w.Close()
+
 	for _, filePath := range files {
-
-		fileToBeCreated, err := Z.zipWriter.Create(filePath)
-
-		if err != nil {
-			continue
-		}
-
 		file, err := os.Open(filePath)
 
 		if err != nil {
+			fmt.Println("error open file", err)
+			continue
+		}
+		defer file.Close()
+
+		read, _ := io.ReadAll(file)
+		fileToBeCreated, err := w.Create(file.Name())
+		if err != nil {
+			fmt.Println("error w.create", err)
 			continue
 		}
 
-		io.Copy(fileToBeCreated, file)
-
-		defer file.Close()
+		fileToBeCreated.Write(read)
 	}
-
-	defer Z.file.Close()
 }
