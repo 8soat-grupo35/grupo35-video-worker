@@ -1,4 +1,4 @@
-package main
+package gateways
 
 import (
 	"archive/zip"

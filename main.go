@@ -1,15 +1,18 @@
 package main
 
 import (
-	"os"
+	"context"
+	"grupo35-video-worker/internal/handlers"
+
+	"github.com/aws/aws-sdk-go-v2/config"
 )
 
 func main() {
-	os.Mkdir("screenshots", 0777)
-	video := NewVideo("video_teste.mp4", "screenshots/video_teste_output_%f.png")
-	screenshotsFiles := video.GenerateVideoScreenshots(0, 1)
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 
-	zip := NewZipGenerator("screenshots.zip")
-	zip.AddFiles(screenshotsFiles)
-	os.RemoveAll("screenshots")
+	if err != nil {
+		panic(err)
+	}
+
+	handlers.ProcessVideos(cfg)
 }
