@@ -2,6 +2,7 @@ package gateways
 
 import (
 	"fmt"
+	"grupo35-video-worker/internal/interfaces/repository"
 
 	"github.com/mowshon/moviego"
 )
@@ -11,7 +12,7 @@ type Video struct {
 	fileFormatPath string
 }
 
-func NewVideo(videoPath string, fileFormatPath string) Video {
+func NewVideo(videoPath string, fileFormatPath string) repository.Video {
 	video, _ := moviego.Load(videoPath)
 
 	return Video{

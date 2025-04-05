@@ -3,6 +3,7 @@ package gateways
 import (
 	"archive/zip"
 	"fmt"
+	"grupo35-video-worker/internal/interfaces/repository"
 	"io"
 	"os"
 )
@@ -12,7 +13,7 @@ type ZipGenerator struct {
 	file            *os.File
 }
 
-func NewZipGenerator(destinationPath string) ZipGenerator {
+func NewZipGenerator(destinationPath string) repository.Zip {
 	file, err := os.Create(destinationPath)
 
 	if err != nil {

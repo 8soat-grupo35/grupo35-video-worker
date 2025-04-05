@@ -3,6 +3,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+	"grupo35-video-worker/internal/interfaces/repository"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -15,7 +16,7 @@ type SQSHelper struct {
 	maxNumberOfMessages int32
 }
 
-func NewSQSConsumer(cfg aws.Config, queueName string, maxNumberOfMessages int32) SQSHelper {
+func NewSQSConsumer(cfg aws.Config, queueName string, maxNumberOfMessages int32) repository.SQS {
 	return SQSHelper{
 		client:              sqs.NewFromConfig(cfg),
 		queueName:           queueName,
