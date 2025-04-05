@@ -1,0 +1,10 @@
+version: '3'
+services:
+  video_worker:
+    container_name: video_worker
+    volumes:
+      - ./:/app
+      - ~/.aws:/root/.aws:ro
+    build: .
+    ports:
+      - "8000:8000"
