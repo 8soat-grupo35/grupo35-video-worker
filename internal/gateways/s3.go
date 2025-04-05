@@ -3,6 +3,7 @@ package gateways
 import (
 	"context"
 	"errors"
+	"grupo35-video-worker/internal/interfaces/repository"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,10 +16,10 @@ type S3 struct {
 	bucketName *string
 }
 
-func NewS3Manager(cfg aws.Config) S3 {
+func NewS3Manager(cfg aws.Config) repository.S3 {
 	s3Instance := s3.NewFromConfig(cfg)
 
-	return S3{
+	return &S3{
 		client: s3Instance,
 	}
 }
@@ -27,7 +28,7 @@ func (S *S3) SetBucketName(bucketName string) {
 	S.bucketName = &bucketName
 }
 
-func (S S3) DownloadFile(key string, destinationPath string) error {
+func (S *S3) DownloadFile(key string, destinationPath string) error {
 	if S.bucketName == nil {
 		return errors.New("bucket name is not set")
 	}
@@ -50,7 +51,7 @@ func (S S3) DownloadFile(key string, destinationPath string) error {
 	return err
 }
 
-func (S S3) UploadFile(key string, filePath string) error {
+func (S *S3) UploadFile(key string, filePath string) error {
 	if S.bucketName == nil {
 		return errors.New("bucket name is not set")
 	}
