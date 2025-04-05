@@ -11,7 +11,7 @@ pre_cmd = []
 # Just plain old shell command. You could use `make` as well.
 cmd = "go build -buildvcs=false -o ./build/api . "
 # Array of commands to run after ^C
-post_cmd = []
+post_cmd = ["echo 'Build success!'"]
 # Binary file yields from `cmd`.
 bin = "./api"
 # Customize binary, can setup environment variables when run your app.

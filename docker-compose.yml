@@ -1,7 +1,7 @@
 version: '3'
 services:
   video_worker:
-    container_name: video_worker
+    container_name: video_worker_app
     volumes:
       - ./:/app
       - ~/.aws:/root/.aws:ro
