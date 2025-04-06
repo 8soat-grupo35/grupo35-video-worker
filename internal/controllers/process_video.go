@@ -1,18 +1,17 @@
 package controllers
 
 import (
+	"grupo35-video-worker/internal/adapters/wrappers"
 	"grupo35-video-worker/internal/gateways"
 	"grupo35-video-worker/internal/usecases"
 	"os"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
-func ProcessVideo(cfg aws.Config, videoPath string) error {
+func ProcessVideo(s3Client wrappers.IS3Client, videoPath string) error {
 	os.Mkdir("screenshots", 0777)
 	defer os.RemoveAll("screenshots")
 
-	s3 := gateways.NewS3Manager(cfg)
+	s3 := gateways.NewS3Manager(s3Client)
 	outputVideo, err := usecases.GetVideo(s3, videoPath)
 
 	if err != nil {

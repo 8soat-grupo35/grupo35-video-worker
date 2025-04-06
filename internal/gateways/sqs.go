@@ -3,6 +3,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+	"grupo35-video-worker/internal/adapters/wrappers"
 	"grupo35-video-worker/internal/interfaces/repository"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -11,14 +12,14 @@ import (
 )
 
 type SQSHelper struct {
-	client              *sqs.Client
+	client              wrappers.ISQSClient
 	queueName           string
 	maxNumberOfMessages int32
 }
 
-func NewSQSConsumer(cfg aws.Config, queueName string, maxNumberOfMessages int32) repository.SQS {
+func NewSQSConsumer(client wrappers.ISQSClient, queueName string, maxNumberOfMessages int32) repository.SQS {
 	return SQSHelper{
-		client:              sqs.NewFromConfig(cfg),
+		client:              client,
 		queueName:           queueName,
 		maxNumberOfMessages: maxNumberOfMessages,
 	}
