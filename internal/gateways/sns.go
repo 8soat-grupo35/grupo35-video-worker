@@ -3,6 +3,7 @@ package gateways
 import (
 	"context"
 	"encoding/json"
+	"grupo35-video-worker/internal/adapters/wrappers"
 	"grupo35-video-worker/internal/interfaces/repository"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -10,14 +11,14 @@ import (
 )
 
 type SNS struct {
-	client   *sns.Client
-	topicArn string
+	Client   wrappers.ISNSClient
+	TopicArn string
 }
 
-func NewSNS(cfg aws.Config, topicArn string) repository.SNS {
+func NewSNS(client wrappers.ISNSClient, topicArn string) repository.SNS {
 	return SNS{
-		client:   sns.NewFromConfig(cfg),
-		topicArn: topicArn,
+		Client:   client,
+		TopicArn: topicArn,
 	}
 }
 
@@ -28,8 +29,8 @@ func (S SNS) SendMessage(message interface{}) error {
 		return err
 	}
 
-	_, err = S.client.Publish(context.TODO(), &sns.PublishInput{
-		TopicArn: aws.String(S.topicArn),
+	_, err = S.Client.Publish(context.TODO(), &sns.PublishInput{
+		TopicArn: aws.String(S.TopicArn),
 		Message:  aws.String(string(convertedMessage)),
 	})
 

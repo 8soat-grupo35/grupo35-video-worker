@@ -5,6 +5,7 @@ import (
 	"grupo35-video-worker/internal/gateways"
 )
 
+//go:generate mockgen -source=create_zip_from_screenshots.go -destination=mock/create_zip_from_screenshots.go
 func CreateZipFromScreenshots(screenshotsFiles []string) (zipPath string) {
 	fmt.Println("Creating zip from screenshots")
 

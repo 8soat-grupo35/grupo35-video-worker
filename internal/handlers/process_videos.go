@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"grupo35-video-worker/internal/adapters"
+	"grupo35-video-worker/internal/adapters/wrappers"
 	"grupo35-video-worker/internal/controllers"
 	"grupo35-video-worker/internal/gateways"
 	"grupo35-video-worker/internal/presenter"
@@ -13,8 +14,13 @@ import (
 )
 
 func ProcessVideos(cfg aws.Config) {
+	sqsClient := wrappers.NewSQSClient(cfg)
+	snsClient := wrappers.NewSNSClient(cfg)
+	s3Client := wrappers.NewS3Client(cfg)
+
 	for {
-		consumer := gateways.NewSQSConsumer(cfg, "video-process-queue", 10)
+
+		consumer := gateways.NewSQSConsumer(sqsClient, "video-process-queue", 10)
 
 		consumer.ConsumeMessages(func(message types.Message) {
 			videoToProcess, err := adapters.NewVideoToProcessFromSQSMessage(message)
@@ -24,7 +30,7 @@ func ProcessVideos(cfg aws.Config) {
 				return
 			}
 
-			err = controllers.ProcessVideo(cfg, videoToProcess.VideoPath)
+			err = controllers.ProcessVideo(s3Client, videoToProcess.VideoPath)
 
 			snsResponse := presenter.VideoStatus{
 				User:    videoToProcess.User,
@@ -38,7 +44,7 @@ func ProcessVideos(cfg aws.Config) {
 			}
 
 			fmt.Println("Sending status to SNS")
-			snsClient := gateways.NewSNS(cfg, "arn:aws:sns:us-east-1:633053670772:video-status-topic")
+			snsClient := gateways.NewSNS(snsClient, "arn:aws:sns:us-east-1:633053670772:video-status-topic")
 			err = usecases.SendVideoStatusTopic(snsClient, snsResponse)
 
 			if err != nil {
