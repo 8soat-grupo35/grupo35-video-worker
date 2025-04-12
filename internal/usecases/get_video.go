@@ -5,6 +5,7 @@ import (
 	"grupo35-video-worker/internal/interfaces/repository"
 )
 
+//go:generate mockgen -source=get_video.go -destination=mock/get_video.go
 func GetVideo(s3 repository.S3, videoPath string) (outputPath string, err error) {
 	fmt.Println("Getting file from S3: ", videoPath)
 
