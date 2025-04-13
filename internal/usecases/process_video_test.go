@@ -1,0 +1,63 @@
+package usecases
+
+import (
+	mock_repository "grupo35-video-worker/internal/interfaces/repository/mock"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
+)
+
+func TestGenerateVideoScreenshots(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	screenshotsFiles := []string{"screenshots/video_teste_output_0.png"}
+
+	videoProcessor := mock_repository.NewMockVideo(ctrl)
+	videoProcessor.EXPECT().SetVideoConfig(gomock.Any(), gomock.Any()).Return().AnyTimes()
+	videoProcessor.EXPECT().GenerateVideoScreenshots(gomock.Any(), gomock.Any()).Return(screenshotsFiles, nil).AnyTimes()
+
+	zipProcessor := mock_repository.NewMockZip(ctrl)
+
+	processVideo := ProcessVideo{
+		ProcessVideoConfig: ProcessVideoConfig{
+			VideoPath:         "video.mp4",
+			ScreenshotsOutput: "screenshots/video_teste_output_%f.png",
+			ZipPath:           "screenshots.zip",
+		},
+		VideoProcessor: videoProcessor,
+		ZipProcessor:   zipProcessor,
+	}
+
+	response, err := processVideo.GenerateVideoScreenshots("video.mp4")
+
+	assert.NoError(t, err)
+	assert.Equal(t, screenshotsFiles, response)
+}
+
+func TestCreateZipFromScreenshots(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	screenshotsFiles := []string{"screenshots/video_teste_output_0.png"}
+
+	videoProcessor := mock_repository.NewMockVideo(ctrl)
+	zipProcessor := mock_repository.NewMockZip(ctrl)
+	zipProcessor.EXPECT().CreateZipWithScreenshots("screenshots.zip", screenshotsFiles).Return(nil).AnyTimes()
+
+	processVideo := ProcessVideo{
+		ProcessVideoConfig: ProcessVideoConfig{
+			VideoPath:         "video.mp4",
+			ScreenshotsOutput: "screenshots/video_teste_output_%f.png",
+			ZipPath:           "screenshots.zip",
+		},
+		VideoProcessor: videoProcessor,
+		ZipProcessor:   zipProcessor,
+	}
+
+	response, err := processVideo.CreateZipFromScreenshots(screenshotsFiles)
+
+	assert.Equal(t, processVideo.ZipPath, response)
+	assert.NoError(t, err)
+}

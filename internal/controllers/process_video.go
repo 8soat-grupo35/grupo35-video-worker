@@ -1,28 +1,59 @@
 package controllers
 
 import (
-	"grupo35-video-worker/internal/adapters/wrappers"
-	"grupo35-video-worker/internal/gateways"
+	"grupo35-video-worker/internal/interfaces/repository"
 	"grupo35-video-worker/internal/usecases"
 	"os"
 )
 
-func ProcessVideo(s3Client wrappers.IS3Client, videoPath string) error {
+type ProcessVideo struct {
+	videoPath      string
+	fileTransfer   usecases.ITransferFile
+	videoProcessor usecases.IProcessVideo
+}
+
+func NewProcessVideo(videoPath string, s3manager repository.S3, videoProcessor repository.Video, zipProcessor repository.Zip) ProcessVideo {
+
+	return ProcessVideo{
+		videoPath:    videoPath,
+		fileTransfer: usecases.NewTransferFile(s3manager),
+		videoProcessor: usecases.NewProcessVideo(usecases.ProcessVideo{
+			ProcessVideoConfig: usecases.ProcessVideoConfig{
+				VideoPath:         videoPath,
+				ScreenshotsOutput: "screenshots/video_teste_output_%f.png",
+				ZipPath:           "screenshots.zip",
+			},
+			VideoProcessor: videoProcessor,
+			ZipProcessor:   zipProcessor,
+		}),
+	}
+}
+
+func (p ProcessVideo) ProcessVideo() error {
 	os.Mkdir("screenshots", 0777)
 	defer os.RemoveAll("screenshots")
 
-	s3 := gateways.NewS3Manager(s3Client)
-	outputVideo, err := usecases.GetVideo(s3, videoPath)
+	output := "video.mp4"
+
+	outputVideo, err := p.fileTransfer.GetVideo(p.videoPath, output)
 
 	if err != nil {
 		return err
 	}
 
-	screenshotsFiles := usecases.GenerateVideoScreenshots(outputVideo)
+	screenshotsFiles, err := p.videoProcessor.GenerateVideoScreenshots(outputVideo)
 
-	zipPath := usecases.CreateZipFromScreenshots(screenshotsFiles)
+	if err != nil {
+		return err
+	}
 
-	err = usecases.UploadZip(s3, zipPath)
+	zipPath, err := p.videoProcessor.CreateZipFromScreenshots(screenshotsFiles)
+
+	if err != nil {
+		return err
+	}
+
+	err = p.fileTransfer.UploadZip(zipPath)
 
 	if err != nil {
 		return err
