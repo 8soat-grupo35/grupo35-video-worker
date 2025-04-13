@@ -3,6 +3,7 @@ FROM golang:1.23
 WORKDIR /app
 COPY . /app
 
+RUN sudo apt install ffmpeg
 RUN go install github.com/air-verse/air@latest
 
 COPY go.mod go.sum ./
