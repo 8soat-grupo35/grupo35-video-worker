@@ -3,26 +3,31 @@ package handlers
 import (
 	"fmt"
 	"grupo35-video-worker/internal/adapters"
-	"grupo35-video-worker/internal/adapters/wrappers"
 	"grupo35-video-worker/internal/controllers"
-	"grupo35-video-worker/internal/gateways"
-	"grupo35-video-worker/internal/presenter"
-	"grupo35-video-worker/internal/usecases"
+	"grupo35-video-worker/internal/interfaces/repository"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
-func ProcessVideos(cfg aws.Config) {
-	sqsClient := wrappers.NewSQSClient(cfg)
-	snsClient := wrappers.NewSNSClient(cfg)
-	s3Client := wrappers.NewS3Client(cfg)
+//go:generate mockgen -source=process_videos.go -destination=mock/process_videos.go
+type IProcessVideosHandler interface {
+	ProcessVideos()
+}
+type ProcessVideosConfig struct {
+	SQS   repository.SQS
+	SNS   repository.SNS
+	S3    repository.S3
+	Video repository.Video
+	Zip   repository.Zip
+}
 
+func NewProcessVideosHandler(config ProcessVideosConfig) IProcessVideosHandler {
+	return config
+}
+
+func (p ProcessVideosConfig) ProcessVideos() {
 	for {
-
-		consumer := gateways.NewSQSConsumer(sqsClient, "video-process-queue", 10)
-
-		consumer.ConsumeMessages(func(message types.Message) {
+		p.SQS.ConsumeMessages(func(message types.Message) {
 			videoToProcess, err := adapters.NewVideoToProcessFromSQSMessage(message)
 
 			if err != nil {
@@ -30,22 +35,15 @@ func ProcessVideos(cfg aws.Config) {
 				return
 			}
 
-			err = controllers.ProcessVideo(s3Client, videoToProcess.VideoPath)
+			controller := controllers.NewProcessVideo(videoToProcess.VideoPath, p.S3, p.Video, p.Zip)
+			err = controller.ProcessVideo()
 
-			snsResponse := presenter.VideoStatus{
-				User:    videoToProcess.User,
-				Status:  "processed",
-				ZipPath: "screenshots.zip",
-			}
+			notifier := controllers.NewNotifyVideoStatus(
+				*videoToProcess,
+				p.SNS,
+			)
 
-			if err != nil {
-				snsResponse.Status = "error"
-				snsResponse.ZipPath = ""
-			}
-
-			fmt.Println("Sending status to SNS")
-			snsClient := gateways.NewSNS(snsClient, "arn:aws:sns:us-east-1:633053670772:video-status-topic")
-			err = usecases.SendVideoStatusTopic(snsClient, snsResponse)
+			err = notifier.Notify(err == nil)
 
 			if err != nil {
 				fmt.Println(err)

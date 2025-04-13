@@ -9,28 +9,36 @@ import (
 )
 
 type ZipGenerator struct {
-	destinationPath string
-	file            *os.File
+	basePath string
 }
 
-func NewZipGenerator(destinationPath string) repository.Zip {
+func NewZipGenerator(basePath string) repository.Zip {
+	return &ZipGenerator{
+		basePath: basePath,
+	}
+}
+
+func (Z *ZipGenerator) createZip(destinationPath string) error {
 	file, err := os.Create(destinationPath)
 
 	if err != nil {
 		fmt.Println(err)
-		panic(err)
+		return err
 	}
 
 	defer file.Close()
 
-	return ZipGenerator{
-		destinationPath: destinationPath,
-		file:            file,
-	}
+	return nil
 }
 
-func (Z ZipGenerator) AddFiles(files []string) {
-	zipFile, _ := os.OpenFile(Z.destinationPath, os.O_CREATE|os.O_WRONLY, 0644)
+func (Z *ZipGenerator) CreateZipWithScreenshots(destinationPath string, files []string) error {
+	err := Z.createZip(Z.basePath + destinationPath)
+
+	if err != nil {
+		return err
+	}
+
+	zipFile, _ := os.OpenFile(Z.basePath+destinationPath, os.O_CREATE|os.O_WRONLY, 0644)
 	defer zipFile.Close()
 
 	w := zip.NewWriter(zipFile)
@@ -41,7 +49,7 @@ func (Z ZipGenerator) AddFiles(files []string) {
 
 		if err != nil {
 			fmt.Println("error open file", err)
-			continue
+			return err
 		}
 		defer file.Close()
 
@@ -49,9 +57,11 @@ func (Z ZipGenerator) AddFiles(files []string) {
 		fileToBeCreated, err := w.Create(file.Name())
 		if err != nil {
 			fmt.Println("error w.create", err)
-			continue
+			return err
 		}
 
 		fileToBeCreated.Write(read)
 	}
+
+	return nil
 }

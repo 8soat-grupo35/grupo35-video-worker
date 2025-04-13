@@ -25,14 +25,14 @@ func NewSQSConsumer(client wrappers.ISQSClient, queueName string, maxNumberOfMes
 	}
 }
 
-func (S SQSHelper) ConsumeMessages(consumeFn func(message types.Message)) {
+func (S SQSHelper) ConsumeMessages(consumeFn func(message types.Message)) error {
 	output, err := S.client.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
 		QueueUrl:            aws.String(S.queueName),
 		MaxNumberOfMessages: S.maxNumberOfMessages,
 	})
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Println("Getting messages from SQS length: ", len(output.Messages))
@@ -40,9 +40,15 @@ func (S SQSHelper) ConsumeMessages(consumeFn func(message types.Message)) {
 	for _, message := range output.Messages {
 		consumeFn(message)
 
-		S.client.DeleteMessage(context.TODO(), &sqs.DeleteMessageInput{
+		_, err = S.client.DeleteMessage(context.TODO(), &sqs.DeleteMessageInput{
 			QueueUrl:      aws.String(S.queueName),
 			ReceiptHandle: message.ReceiptHandle,
 		})
+
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }

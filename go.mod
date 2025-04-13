@@ -10,6 +10,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.34.3
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.4
 	github.com/mowshon/moviego v1.0.1
+	github.com/stretchr/testify v1.10.0
+	go.uber.org/mock v0.5.1
 )
 
 require (
@@ -29,11 +31,13 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.18 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/stretchr/testify v1.7.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/u2takey/ffmpeg-go v0.5.0 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
