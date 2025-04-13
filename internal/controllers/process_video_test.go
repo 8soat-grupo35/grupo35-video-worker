@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"grupo35-video-worker/internal/adapters"
+	"grupo35-video-worker/internal/entities"
 	mock_usecases "grupo35-video-worker/internal/usecases/mock"
 	"testing"
 
@@ -12,18 +14,26 @@ func TestProcessVideo_Sucess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	videoPath := "video.mp4"
 
+	videoPathStructure := adapters.GetVideoProcessPathStructure(adapters.VideoToProcess{
+		User: entities.User{
+			ID:    "1",
+			Email: "teste@teste.com",
+		},
+		VideoPath: videoPath,
+	})
+
 	transferFiles := mock_usecases.NewMockITransferFile(ctrl)
 	transferFiles.EXPECT().GetVideo(videoPath, gomock.Any()).Return(videoPath, nil).AnyTimes()
-	transferFiles.EXPECT().UploadZip(gomock.Any()).Return(nil).AnyTimes()
+	transferFiles.EXPECT().UploadZip(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
 	videoProcessor := mock_usecases.NewMockIProcessVideo(ctrl)
-	videoProcessor.EXPECT().GenerateVideoScreenshots(gomock.Any()).Return([]string{"screenshots/video_teste_output_0.png"}, nil).AnyTimes()
-	videoProcessor.EXPECT().CreateZipFromScreenshots(gomock.Any()).Return("screenshots.zip", nil).AnyTimes()
+	videoProcessor.EXPECT().GenerateVideoScreenshots(gomock.Any(), gomock.Any()).Return([]string{"screenshots/video_teste_output_0.png"}, nil).AnyTimes()
+	videoProcessor.EXPECT().CreateZipFromScreenshots(gomock.Any(), gomock.Any()).Return("screenshots.zip", nil).AnyTimes()
 
 	processVideo := ProcessVideo{
-		videoPath:      videoPath,
-		fileTransfer:   transferFiles,
-		videoProcessor: videoProcessor,
+		videoPathStructure: videoPathStructure,
+		fileTransfer:       transferFiles,
+		videoProcessor:     videoProcessor,
 	}
 
 	err := processVideo.ProcessVideo()
@@ -35,15 +45,23 @@ func TestProcessVideo_Error_GetVideo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	videoPath := "video.mp4"
 
+	videoPathStructure := adapters.GetVideoProcessPathStructure(adapters.VideoToProcess{
+		User: entities.User{
+			ID:    "1",
+			Email: "teste@teste.com",
+		},
+		VideoPath: videoPath,
+	})
+
 	transferFiles := mock_usecases.NewMockITransferFile(ctrl)
 	transferFiles.EXPECT().GetVideo(videoPath, gomock.Any()).Return("", assert.AnError).AnyTimes()
 
 	videoProcessor := mock_usecases.NewMockIProcessVideo(ctrl)
 
 	processVideo := ProcessVideo{
-		videoPath:      videoPath,
-		fileTransfer:   transferFiles,
-		videoProcessor: videoProcessor,
+		videoPathStructure: videoPathStructure,
+		fileTransfer:       transferFiles,
+		videoProcessor:     videoProcessor,
 	}
 
 	err := processVideo.ProcessVideo()
@@ -54,19 +72,26 @@ func TestProcessVideo_Error_GetVideo(t *testing.T) {
 func TestProcessVideo_Error_UploadZip(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	videoPath := "video.mp4"
+	videoPathStructure := adapters.GetVideoProcessPathStructure(adapters.VideoToProcess{
+		User: entities.User{
+			ID:    "1",
+			Email: "teste@teste.com",
+		},
+		VideoPath: videoPath,
+	})
 
 	transferFiles := mock_usecases.NewMockITransferFile(ctrl)
 	transferFiles.EXPECT().GetVideo(videoPath, gomock.Any()).Return(videoPath, nil).AnyTimes()
-	transferFiles.EXPECT().UploadZip(gomock.Any()).Return(assert.AnError).AnyTimes()
+	transferFiles.EXPECT().UploadZip(gomock.Any(), gomock.Any()).Return(assert.AnError).AnyTimes()
 
 	videoProcessor := mock_usecases.NewMockIProcessVideo(ctrl)
-	videoProcessor.EXPECT().GenerateVideoScreenshots(gomock.Any()).Return([]string{"screenshots/video_teste_output_0.png"}, nil).AnyTimes()
-	videoProcessor.EXPECT().CreateZipFromScreenshots(gomock.Any()).Return("screenshots.zip", nil).AnyTimes()
+	videoProcessor.EXPECT().GenerateVideoScreenshots(gomock.Any(), gomock.Any()).Return([]string{"screenshots/video_teste_output_0.png"}, nil).AnyTimes()
+	videoProcessor.EXPECT().CreateZipFromScreenshots(gomock.Any(), gomock.Any()).Return("screenshots.zip", nil).AnyTimes()
 
 	processVideo := ProcessVideo{
-		videoPath:      videoPath,
-		fileTransfer:   transferFiles,
-		videoProcessor: videoProcessor,
+		videoPathStructure: videoPathStructure,
+		fileTransfer:       transferFiles,
+		videoProcessor:     videoProcessor,
 	}
 
 	err := processVideo.ProcessVideo()

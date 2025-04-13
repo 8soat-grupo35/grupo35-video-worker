@@ -15,7 +15,7 @@ func TestCreateZipWithScreenshots_Success(t *testing.T) {
 	f.Close()
 	defer os.Remove("test/data/test.txt")
 
-	zipGenerator := NewZipGenerator("")
+	zipGenerator := NewZipGenerator()
 	zipGenerator.CreateZipWithScreenshots(destinationPath, []string{"test/data/test.txt"})
 
 	assert.FileExists(t, destinationPath)
@@ -23,7 +23,7 @@ func TestCreateZipWithScreenshots_Success(t *testing.T) {
 
 func TestCreateZipWithScreenshots_Error_CreateZip(t *testing.T) {
 	destinationPath := "test/data/"
-	zipGenerator := NewZipGenerator("")
+	zipGenerator := NewZipGenerator()
 
 	err := zipGenerator.CreateZipWithScreenshots(destinationPath, []string{})
 

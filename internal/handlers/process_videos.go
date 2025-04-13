@@ -28,6 +28,7 @@ func NewProcessVideosHandler(config ProcessVideosConfig) IProcessVideosHandler {
 func (p ProcessVideosConfig) ProcessVideos() {
 	for {
 		p.SQS.ConsumeMessages(func(message types.Message) {
+			fmt.Println(message)
 			videoToProcess, err := adapters.NewVideoToProcessFromSQSMessage(message)
 
 			if err != nil {
@@ -35,7 +36,9 @@ func (p ProcessVideosConfig) ProcessVideos() {
 				return
 			}
 
-			controller := controllers.NewProcessVideo(videoToProcess.VideoPath, p.S3, p.Video, p.Zip)
+			videoPathStructure := adapters.GetVideoProcessPathStructure(*videoToProcess)
+
+			controller := controllers.NewProcessVideo(videoPathStructure, p.S3, p.Video, p.Zip)
 			err = controller.ProcessVideo()
 
 			notifier := controllers.NewNotifyVideoStatus(
@@ -43,7 +46,7 @@ func (p ProcessVideosConfig) ProcessVideos() {
 				p.SNS,
 			)
 
-			err = notifier.Notify(err == nil)
+			err = notifier.Notify(err == nil, videoPathStructure.ZipOutputPath)
 
 			if err != nil {
 				fmt.Println(err)

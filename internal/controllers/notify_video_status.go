@@ -20,11 +20,11 @@ func NewNotifyVideoStatus(videoToProcessMessage adapters.VideoToProcess, snsNoti
 	}
 }
 
-func (n NotifyVideoStatus) Notify(success bool) error {
+func (n NotifyVideoStatus) Notify(success bool, zipPath string) error {
 	snsResponse := presenter.VideoStatus{
 		User:    n.videoToProcessMessage.User,
 		Status:  "processed",
-		ZipPath: "screenshots.zip",
+		ZipPath: zipPath,
 	}
 
 	if !success {

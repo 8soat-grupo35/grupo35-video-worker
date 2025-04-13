@@ -3,6 +3,7 @@ package gateways
 import (
 	"context"
 	"errors"
+	"fmt"
 	"grupo35-video-worker/internal/adapters/wrappers"
 	"grupo35-video-worker/internal/interfaces/repository"
 	"os"
@@ -40,6 +41,7 @@ func (S *S3) DownloadFile(key string, destinationPath string) error {
 
 	defer f.Close()
 
+	fmt.Println("Downloading file from S3 to", destinationPath)
 	_, err = S.client.Download(context.TODO(), f, &s3.GetObjectInput{
 		Bucket: aws.String(*S.bucketName),
 		Key:    aws.String(key),
@@ -60,6 +62,8 @@ func (S *S3) UploadFile(key string, filePath string) error {
 	}
 
 	defer f.Close()
+
+	fmt.Println("Uploading file to S3", key, filePath)
 
 	_, err = S.client.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(*S.bucketName),

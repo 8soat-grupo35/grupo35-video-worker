@@ -3,6 +3,7 @@ package gateways
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"grupo35-video-worker/internal/adapters/wrappers"
 	"grupo35-video-worker/internal/interfaces/repository"
 
@@ -28,6 +29,8 @@ func (S SNS) SendMessage(message interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("sending message to sns", convertedMessage)
 
 	_, err = S.Client.Publish(context.TODO(), &sns.PublishInput{
 		TopicArn: aws.String(S.TopicArn),
