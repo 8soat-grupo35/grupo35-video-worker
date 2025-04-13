@@ -55,7 +55,7 @@ jobs:
           kubectl create secret generic aws-secrets \
             --from-literal=access-key-id=${{ secrets.AWS_ACCESS_KEY_ID }} \
             --from-literal=secret-access-key=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            --from-literal=access-session-token=${{ secrets.AWS_SESSION_TOKEN }}
+            --from-literal=access-session-token=${{ secrets.AWS_SESSION_TOKEN }}  --overwrite
           envsubst < kubernetes/video-worker-deployment.yaml | kubectl apply -f -
           kubectl apply -f kubernetes/video-worker-hpa.yaml
           kubectl set image deployment/video-worker-app video-worker-app=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION_DEFAULT }}.amazonaws.com/video-worker-app:latest
