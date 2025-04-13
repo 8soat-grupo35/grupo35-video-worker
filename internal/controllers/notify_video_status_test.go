@@ -30,7 +30,7 @@ func TestNotify_Success(t *testing.T) {
 	}).Return(nil).AnyTimes()
 
 	notify := NewNotifyVideoStatus(videoToProcessMessage, snsNotifier)
-	err := notify.Notify(true)
+	err := notify.Notify(true, "screenshots.zip")
 
 	assert.NoError(t, err)
 }
@@ -54,7 +54,7 @@ func TestNotify_Success_Error_Message(t *testing.T) {
 	}).Return(nil).AnyTimes()
 
 	notify := NewNotifyVideoStatus(videoToProcessMessage, snsNotifier)
-	err := notify.Notify(false)
+	err := notify.Notify(false, "")
 
 	assert.NoError(t, err)
 }
@@ -77,7 +77,7 @@ func TestNotify_Error(t *testing.T) {
 	}).Return(assert.AnError).AnyTimes()
 
 	notify := NewNotifyVideoStatus(videoToProcessMessage, snsNotifier)
-	err := notify.Notify(true)
+	err := notify.Notify(true, "screenshots.zip")
 
 	assert.EqualError(t, err, assert.AnError.Error())
 }

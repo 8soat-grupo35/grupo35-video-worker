@@ -7,37 +7,33 @@ import (
 
 //go:generate mockgen -source=process_video.go -destination=mock/process_video.go
 type IProcessVideo interface {
-	GenerateVideoScreenshots(videoPath string) (screenshotsFiles []string, err error)
-	CreateZipFromScreenshots(screenshotsFiles []string) (zipPath string, err error)
-}
-
-type ProcessVideoConfig struct {
-	VideoPath         string
-	ScreenshotsOutput string
-	ZipPath           string
+	GenerateVideoScreenshots(videoPath string, screenshotsOutputPath string) (screenshotsFiles []string, err error)
+	CreateZipFromScreenshots(screenshotsFiles []string, zipOutputPath string) (zipPath string, err error)
 }
 
 type ProcessVideo struct {
-	ProcessVideoConfig
 	VideoProcessor repository.Video
 	ZipProcessor   repository.Zip
 }
 
-func NewProcessVideo(processVideo ProcessVideo) IProcessVideo {
-	return processVideo
+func NewProcessVideo(videoProcessor repository.Video, zipProcessor repository.Zip) IProcessVideo {
+	return ProcessVideo{
+		VideoProcessor: videoProcessor,
+		ZipProcessor:   zipProcessor,
+	}
 }
 
-func (p ProcessVideo) GenerateVideoScreenshots(videoPath string) (screenshotsFiles []string, err error) {
+func (p ProcessVideo) GenerateVideoScreenshots(videoPath string, screenshotsOutputPath string) (screenshotsFiles []string, err error) {
 	fmt.Println("Processing video downloaded")
-	p.VideoProcessor.SetVideoConfig(videoPath, p.ScreenshotsOutput)
+	p.VideoProcessor.SetVideoConfig(videoPath, screenshotsOutputPath)
 	screenshotsFiles, err = p.VideoProcessor.GenerateVideoScreenshots(0, 1)
 
 	return
 }
 
-func (p ProcessVideo) CreateZipFromScreenshots(screenshotsFiles []string) (zipPath string, err error) {
+func (p ProcessVideo) CreateZipFromScreenshots(screenshotsFiles []string, zipOutputPath string) (zipPath string, err error) {
 	fmt.Println("Creating zip from screenshots")
-	err = p.ZipProcessor.CreateZipWithScreenshots(p.ZipPath, screenshotsFiles)
+	err = p.ZipProcessor.CreateZipWithScreenshots(zipOutputPath, screenshotsFiles)
 
-	return p.ZipPath, err
+	return zipOutputPath, err
 }

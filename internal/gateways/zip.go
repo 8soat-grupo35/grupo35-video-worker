@@ -9,16 +9,14 @@ import (
 )
 
 type ZipGenerator struct {
-	basePath string
 }
 
-func NewZipGenerator(basePath string) repository.Zip {
-	return &ZipGenerator{
-		basePath: basePath,
-	}
+func NewZipGenerator() repository.Zip {
+	return &ZipGenerator{}
 }
 
 func (Z *ZipGenerator) createZip(destinationPath string) error {
+	fmt.Println("creating zip file at", destinationPath)
 	file, err := os.Create(destinationPath)
 
 	if err != nil {
@@ -32,13 +30,14 @@ func (Z *ZipGenerator) createZip(destinationPath string) error {
 }
 
 func (Z *ZipGenerator) CreateZipWithScreenshots(destinationPath string, files []string) error {
-	err := Z.createZip(Z.basePath + destinationPath)
+	err := Z.createZip(destinationPath)
 
 	if err != nil {
 		return err
 	}
 
-	zipFile, _ := os.OpenFile(Z.basePath+destinationPath, os.O_CREATE|os.O_WRONLY, 0644)
+	fmt.Println("adding files to zip", destinationPath)
+	zipFile, _ := os.OpenFile(destinationPath, os.O_CREATE|os.O_WRONLY, 0644)
 	defer zipFile.Close()
 
 	w := zip.NewWriter(zipFile)
@@ -49,7 +48,7 @@ func (Z *ZipGenerator) CreateZipWithScreenshots(destinationPath string, files []
 
 		if err != nil {
 			fmt.Println("error open file", err)
-			return err
+			continue
 		}
 		defer file.Close()
 

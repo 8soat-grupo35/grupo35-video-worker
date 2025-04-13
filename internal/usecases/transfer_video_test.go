@@ -59,7 +59,7 @@ func TestUploadZip_Success(t *testing.T) {
 
 	transfer := NewTransferFile(s3repo)
 
-	err := transfer.UploadZip(zipPath)
+	err := transfer.UploadZip(zipPath, zipPath)
 
 	assert.NoError(t, err)
 }
@@ -74,6 +74,6 @@ func TestUploadZip_error(t *testing.T) {
 	s3repo.EXPECT().SetBucketName("grupo35-video-processed").Return().AnyTimes()
 	s3repo.EXPECT().UploadFile(zipPath, zipPath).Return(assert.AnError).AnyTimes()
 	transfer := NewTransferFile(s3repo)
-	err := transfer.UploadZip(zipPath)
+	err := transfer.UploadZip(zipPath, zipPath)
 	assert.EqualError(t, err, assert.AnError.Error())
 }

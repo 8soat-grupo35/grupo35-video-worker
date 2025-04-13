@@ -9,15 +9,12 @@ import (
 )
 
 type Video struct {
-	basePath       string
 	videoPath      *string
 	fileFormatPath *string
 }
 
-func NewVideo(basePath string) repository.Video {
-	return &Video{
-		basePath: basePath,
-	}
+func NewVideo() repository.Video {
+	return &Video{}
 }
 
 func (V *Video) SetVideoConfig(videoPath string, fileFormatPath string) {
@@ -30,13 +27,18 @@ func (V *Video) GenerateVideoScreenshots(start float64, skipTime float64) ([]str
 		return []string{}, errors.New("set Video Config was not called")
 	}
 
-	video, _ := moviego.Load(V.basePath + *V.videoPath)
+	fmt.Println("Generating screenshots from", *V.videoPath)
+
+	video, _ := moviego.Load(*V.videoPath)
 	screenshots := []string{}
 
 	for i := start; i < video.Duration(); i += skipTime {
-		fmt.Println(fmt.Sprintf(*V.fileFormatPath, i))
-		video.Screenshot(i, fmt.Sprintf(*V.fileFormatPath, i))
-		screenshots = append(screenshots, fmt.Sprintf(*V.fileFormatPath, i))
+		fmt.Println("Generating screenshot at", fmt.Sprintf(*V.fileFormatPath, i))
+		_, err := video.Screenshot(i, fmt.Sprintf(*V.fileFormatPath, i))
+
+		if err == nil {
+			screenshots = append(screenshots, fmt.Sprintf(*V.fileFormatPath, i))
+		}
 	}
 
 	return screenshots, nil

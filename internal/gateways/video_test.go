@@ -11,7 +11,7 @@ func TestGenerateVideoScreenshots_Success(t *testing.T) {
 	os.Mkdir("test/data/screenshots", 0777)
 	defer os.RemoveAll("test/data/screenshots")
 
-	video := NewVideo("")
+	video := NewVideo()
 	video.SetVideoConfig("test/data/teste.mp4", "test/data/screenshots/test-%f.png")
 	screenshots, err := video.GenerateVideoScreenshots(0, 1)
 
@@ -20,7 +20,7 @@ func TestGenerateVideoScreenshots_Success(t *testing.T) {
 }
 
 func TestGenerateVideoScreenshots_Error_SetVideoConfig(t *testing.T) {
-	video := NewVideo("")
+	video := NewVideo()
 	_, err := video.GenerateVideoScreenshots(0, 1)
 
 	assert.EqualError(t, err, "set Video Config was not called")

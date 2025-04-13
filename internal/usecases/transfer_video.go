@@ -8,11 +8,11 @@ import (
 //go:generate mockgen -source=transfer_video.go -destination=mock/transfer_video.go
 type ITransferFile interface {
 	GetVideo(videoPath string, videoDownloadOutputPath string) (outputPath string, err error)
-	UploadZip(zipPath string) (err error)
+	UploadZip(key string, zipPath string) (err error)
 }
 
 type TransferFile struct {
-	S3  repository.S3
+	S3 repository.S3
 }
 
 func NewTransferFile(s3 repository.S3) ITransferFile {
@@ -36,10 +36,10 @@ func (t TransferFile) GetVideo(videoPath string, videoDownloadOutputPath string)
 	return
 }
 
-func (t TransferFile) UploadZip(zipPath string) (err error) {
+func (t TransferFile) UploadZip(key string, zipPath string) (err error) {
 	fmt.Println("Uploading processed video to S3")
 	t.S3.SetBucketName("grupo35-video-processed")
-	err = t.S3.UploadFile(zipPath, zipPath)
+	err = t.S3.UploadFile(key, zipPath)
 
 	if err != nil {
 		fmt.Println(err)
