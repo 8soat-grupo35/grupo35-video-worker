@@ -30,7 +30,7 @@ func main() {
 
 	videoProcessorHandler := handlers.NewProcessVideosHandler(handlers.ProcessVideosConfig{
 		SQS:   gateways.NewSQSConsumer(sqsClient, "video-process-queue", 10),
-		SNS:   gateways.NewSNS(snsClient, "arn:aws:sns:us-east-1:633053670772:video-status-topic"),
+		SNS:   gateways.NewSNS(snsClient, "arn:aws:sns:us-east-1:"+os.Getenv("AWS_ACCOUNT_ID")+":video-status-topic"),
 		S3:    gateways.NewS3Manager(s3Client),
 		Video: gateways.NewVideo(),
 		Zip:   gateways.NewZipGenerator(),
