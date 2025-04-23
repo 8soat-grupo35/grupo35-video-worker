@@ -23,22 +23,22 @@ spec:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: aws-secrets
+                name: aws-video-worker-secrets
                 key: access-key-id
           - name: AWS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: aws-secrets
+                name: aws-video-worker-secrets
                 key: secret-access-key
           - name: AWS_ACCOUNT_ID
             valueFrom:
               secretKeyRef:
-                name: aws-secrets
+                name: aws-video-worker-secrets
                 key: account-id
           - name: AWS_SESSION_TOKEN
             valueFrom:
               secretKeyRef:
-                name: aws-secrets
+                name: aws-video-worker-secrets
                 key: access-session-token
           - name: AWS_REGION
             value: us-east-1
